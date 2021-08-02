@@ -1,21 +1,27 @@
 import * as fs from "fs";
-import { pathToFileURL } from "url";
 import {
   AbstractDirectory,
   AbstractFile,
   AbstractFileSystem,
   FileSystemOptions,
   HeadOptions,
-  PatchOptions,
-  Props,
-  Stats,
-  URLType,
   InvalidStateError,
   NoModificationAllowedError,
   NotFoundError,
   NotReadableError,
+  NotSupportedError,
+  PatchOptions,
+  PathExistsError,
+  Props,
+  QuotaExceededError,
+  SecurityError,
+  Stats,
+  SyntaxError,
+  TypeMismatchError,
+  URLType,
   util,
 } from "isomorphic-fs";
+import { pathToFileURL } from "url";
 import { NodeDirectory } from "./NodeDirectory";
 import { NodeFile } from "./NodeFile";
 
@@ -27,8 +33,30 @@ export function convertError(
   err: NodeJS.ErrnoException,
   write: boolean
 ) {
-  if (err.code === "ENOENT") {
-    return new NotFoundError(repository, path, err);
+  const code = err.code;
+  if (!code) {
+    return new NotSupportedError(repository, path, err);
+  }
+  console.log(err.code);
+  switch (code) {
+    case "ENOENT":
+      return new NotFoundError(repository, path, err);
+    case "ENOTDIR":
+    case "EISDIR":
+      return new TypeMismatchError(repository, path, err);
+    case "EEXIST":
+      return new PathExistsError(repository, path, err);
+    case "EDQUOT":
+      return new QuotaExceededError(repository, path, err);
+    case "EINVAL":
+      return new SyntaxError(repository, path, err);
+    case "EBADFD":
+      return new InvalidStateError(repository, path, err);
+    case "EPERM":
+      return new SecurityError(repository, path, err);
+  }
+  if (0 <= code.indexOf("NOSUPPORT")) {
+    return new NotSupportedError(repository, path, err);
   }
   if (write) {
     return new NoModificationAllowedError(repository, path, err);
