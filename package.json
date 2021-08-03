@@ -1,7 +1,7 @@
 {
   "name": "isomorphic-fs-node",
   "version": "0.0.3",
-  "description": "Isomorphic Filesystem for web",
+  "description": "Isomorphic Filesystem for Node",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "typings": "lib/index.d.ts",
