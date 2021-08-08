@@ -1,9 +1,10 @@
 import * as fs from "fs";
 import {
   AbstractWriteStream,
+  createDOMException,
+  InvalidModificationError,
   OpenWriteOptions,
   SeekOrigin,
-  InvalidModificationError,
 } from "isomorphic-fs";
 import { toBuffer } from "./buffer";
 import { NodeFile } from "./NodeFile";
@@ -28,7 +29,12 @@ export class NodeWriteStream extends AbstractWriteStream {
         if (err) {
           const fso = this.fso;
           reject(
-            new InvalidModificationError(fso.fs.repository, fso.path, err)
+            createDOMException({
+              name: InvalidModificationError.name,
+              repository: fso.fs.repository,
+              path: fso.path,
+              e: err,
+            })
           );
           return;
         }

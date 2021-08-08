@@ -3,21 +3,20 @@ import {
   AbstractDirectory,
   AbstractFile,
   AbstractFileSystem,
+  createDOMException,
   FileSystemOptions,
   HeadOptions,
+  InvalidModificationError,
   InvalidStateError,
   NoModificationAllowedError,
+  NotAllowedError,
   NotFoundError,
   NotReadableError,
   NotSupportedError,
   PatchOptions,
-  PathExistsError,
   Props,
   QuotaExceededError,
-  SecurityError,
   Stats,
-  SyntaxError,
-  TypeMismatchError,
   URLType,
   util,
 } from "isomorphic-fs";
@@ -35,33 +34,80 @@ export function convertError(
 ) {
   const code = err.code;
   if (!code) {
-    return new NotSupportedError(repository, path, err);
+    return createDOMException({
+      repository,
+      path,
+      e: err,
+    });
   }
-  console.log(err.code);
   switch (code) {
     case "ENOENT":
-      return new NotFoundError(repository, path, err);
+      return createDOMException({
+        name: NotFoundError.name,
+        repository,
+        path,
+        e: err,
+      });
     case "ENOTDIR":
     case "EISDIR":
-      return new TypeMismatchError(repository, path, err);
+      return createDOMException({
+        name: write ? InvalidModificationError.name : NotSupportedError.name,
+        repository,
+        path,
+        e: err,
+      });
     case "EEXIST":
-      return new PathExistsError(repository, path, err);
+      return createDOMException({
+        name: NoModificationAllowedError.name,
+        repository,
+        path,
+        e: err,
+      });
     case "EDQUOT":
-      return new QuotaExceededError(repository, path, err);
+      return createDOMException({
+        name: QuotaExceededError.name,
+        repository,
+        path,
+        e: err,
+      });
     case "EINVAL":
-      return new SyntaxError(repository, path, err);
     case "EBADFD":
-      return new InvalidStateError(repository, path, err);
+      return createDOMException({
+        name: InvalidStateError.name,
+        repository,
+        path,
+        e: err,
+      });
     case "EPERM":
-      return new SecurityError(repository, path, err);
+      return createDOMException({
+        name: write ? NoModificationAllowedError.name : NotAllowedError.name,
+        repository,
+        path,
+        e: err,
+      });
   }
   if (0 <= code.indexOf("NOSUPPORT")) {
-    return new NotSupportedError(repository, path, err);
+    return createDOMException({
+      name: NotSupportedError.name,
+      repository,
+      path,
+      e: err,
+    });
   }
   if (write) {
-    return new NoModificationAllowedError(repository, path, err);
+    return createDOMException({
+      name: NoModificationAllowedError.name,
+      repository,
+      path,
+      e: err,
+    });
   } else {
-    return new NotReadableError(repository, path, err);
+    return createDOMException({
+      name: NotReadableError.name,
+      repository,
+      path,
+      e: err,
+    });
   }
 }
 
@@ -102,13 +148,23 @@ export class NodeFileSystem extends AbstractFileSystem {
     return new Promise<void>((resolve, reject) => {
       if (typeof props.accessed !== "number") {
         reject(
-          new InvalidStateError(this.repository, path, "No accessed time")
+          createDOMException({
+            name: InvalidModificationError.name,
+            repository: this.repository,
+            path,
+            e: "No accessed time",
+          })
         );
         return;
       }
       if (typeof props.modified !== "number") {
         reject(
-          new InvalidStateError(this.repository, path, "No modified time")
+          createDOMException({
+            name: InvalidModificationError.name,
+            repository: this.repository,
+            path,
+            e: "No modified time",
+          })
         );
         return;
       }
