@@ -51,8 +51,8 @@ export class NodeWriteStream extends AbstractWriteStream {
     }
 
     const writeStream = this.writeStream as fs.WriteStream;
-    return new Promise<void>((resolve, reject) => {
-      const nodeBuffer = toBuffer(buffer);
+    return new Promise<void>(async (resolve, reject) => {
+      const nodeBuffer = await toBuffer(buffer);
       writeStream.write(nodeBuffer, (err) => {
         if (err) {
           const fso = this.fso;

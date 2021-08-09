@@ -1,21 +1,36 @@
-import { util } from "isomorphic-fs";
+import { DEFAULT_BUFFER_SIZE, util } from "isomorphic-fs";
 import { isBuffer } from "./buffer";
 
-export function toBase64(
+async function bufferToBase64(buffer: Buffer) {
+  return buffer.toString("base64");
+}
+
+export async function toBase64(
   value: Buffer | ArrayBuffer | Uint8Array | string,
   encoding: "utf8" | "base64" = "utf8"
-): string {
+): Promise<string> {
   if (isBuffer(value)) {
-    return value.toString("base64");
+    const chunks: string[] = [];
+    for (
+      let start = 0, end = value.byteLength;
+      start < end;
+      start += DEFAULT_BUFFER_SIZE
+    ) {
+      const buf = value.slice(start, start + DEFAULT_BUFFER_SIZE);
+      const chunk = await bufferToBase64(buf);
+      chunks.push(chunk);
+    }
+    const base64 = chunks.join("");
+    return base64;
   }
 
   return util.toBase64(value, encoding);
 }
 
-export function toString(
+export async function toString(
   value: Buffer | ArrayBuffer | Uint8Array | string,
   encoding: "utf8" | "base64" = "utf8"
-): string {
+): Promise<string> {
   if (isBuffer(value)) {
     return value.toString("utf8");
   }

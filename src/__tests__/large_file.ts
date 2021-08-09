@@ -9,7 +9,7 @@ export const testAll = (fs: FileSystem) => {
     const imagePath = path.join(process.cwd(), "sample.jpg");
     const nodeStats = statSync(imagePath);
     const buffer = readFileSync(imagePath);
-    const ab = toArrayBuffer(buffer);
+    const ab = await toArrayBuffer(buffer);
     await fs.writeAll("/sample.jpg", ab);
     const stats = await fs.stat("/sample.jpg");
     expect(stats.size).toBe(nodeStats.size);
