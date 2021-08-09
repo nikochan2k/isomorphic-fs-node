@@ -1,8 +1,8 @@
 import * as fs from "fs";
 import {
   AbstractWriteStream,
-  createDOMException,
-  InvalidModificationError,
+  createError,
+  NoModificationAllowedError,
   OpenWriteOptions,
   SeekOrigin,
 } from "isomorphic-fs";
@@ -25,15 +25,15 @@ export class NodeWriteStream extends AbstractWriteStream {
     this._destory();
 
     return new Promise<void>((resolve, reject) => {
-      fs.truncate(this.file._getFullPath(), len, (err) => {
-        if (err) {
+      fs.truncate(this.file._getFullPath(), len, (e) => {
+        if (e) {
           const fso = this.fso;
           reject(
-            createDOMException({
-              name: InvalidModificationError.name,
+            createError({
+              name: NoModificationAllowedError.name,
               repository: fso.fs.repository,
               path: fso.path,
-              e: err,
+              e,
             })
           );
           return;
