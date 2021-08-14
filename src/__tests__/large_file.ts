@@ -1,8 +1,9 @@
 import { readFileSync, statSync } from "fs";
+import { FileSystem } from "isomorphic-fs";
+import { binary } from "isomorphic-fs";
 import path from "path";
-import { FileSystem, util } from "isomorphic-fs";
 
-const { toArrayBuffer } = util;
+const { toArrayBuffer } = binary;
 
 export const testAll = (fs: FileSystem) => {
   test("copy large file", async () => {

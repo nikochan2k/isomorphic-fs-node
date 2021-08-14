@@ -6,13 +6,13 @@ import {
   AbstractWriteStream,
   OpenOptions,
   OpenWriteOptions,
-  util,
+  path,
 } from "isomorphic-fs";
 import { convertError } from "./NodeFileSystem";
 import { NodeReadStream } from "./NodeReadStream";
 import { NodeWriteStream } from "./NodeWriteStream";
 
-const { joinPaths } = util;
+const { joinPaths } = path;
 
 export class NodeFile extends AbstractFile {
   public override toString = this._getFullPath;

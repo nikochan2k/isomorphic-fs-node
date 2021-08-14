@@ -1,14 +1,16 @@
 import * as fs from "fs";
 import {
   AbstractWriteStream,
+  binary,
   createError,
   NoModificationAllowedError,
   OpenWriteOptions,
   SeekOrigin,
 } from "isomorphic-fs";
-import { toBuffer } from "./buffer";
 import { NodeFile } from "./NodeFile";
 import { convertError } from "./NodeFileSystem";
+
+const { toBuffer } = binary;
 
 export class NodeWriteStream extends AbstractWriteStream {
   private writeStream?: fs.WriteStream;

@@ -1,9 +1,7 @@
 import { rmdirSync } from "fs";
+import { DIR_SEPARATOR } from "isomorphic-fs/lib/util/path";
 import { tmpdir } from "os";
 import { normalize } from "path";
-import { util } from "isomorphic-fs";
-
-const { DIR_SEPARATOR } = util;
 
 export const getRootDir = () => {
   const tempDir = tmpdir();

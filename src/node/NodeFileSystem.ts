@@ -19,13 +19,13 @@ import {
   SyntaxError,
   TypeMismatchError,
   URLType,
-  util,
+  path,
 } from "isomorphic-fs";
 import { pathToFileURL } from "url";
 import { NodeDirectory } from "./NodeDirectory";
 import { NodeFile } from "./NodeFile";
 
-const { joinPaths, normalizePath } = util;
+const { joinPaths, normalizePath } = path;
 
 export function convertError(
   repository: string,
