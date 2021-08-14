@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import {
   AbstractWriteStream,
-  binary,
   createError,
   NoModificationAllowedError,
   OpenWriteOptions,
@@ -9,8 +8,6 @@ import {
 } from "isomorphic-fs";
 import { NodeFile } from "./NodeFile";
 import { convertError } from "./NodeFileSystem";
-
-const { toBuffer } = binary;
 
 export class NodeWriteStream extends AbstractWriteStream {
   private writeStream?: fs.WriteStream;
@@ -54,7 +51,7 @@ export class NodeWriteStream extends AbstractWriteStream {
 
     const writeStream = this.writeStream as fs.WriteStream;
     return new Promise<void>(async (resolve, reject) => {
-      const nodeBuffer = await toBuffer(buffer);
+      const nodeBuffer = await this.converter.toBuffer(buffer);
       writeStream.write(nodeBuffer, (err) => {
         if (err) {
           const fso = this.fso;

@@ -1,16 +1,16 @@
 import { readFileSync, statSync } from "fs";
 import { FileSystem } from "isomorphic-fs";
-import { binary } from "isomorphic-fs";
+import { conv } from "isomorphic-fs";
 import path from "path";
 
-const { toArrayBuffer } = binary;
+const c = new conv.Converter();
 
 export const testAll = (fs: FileSystem) => {
   test("copy large file", async () => {
     const imagePath = path.join(process.cwd(), "sample.jpg");
     const nodeStats = statSync(imagePath);
     const buffer = readFileSync(imagePath);
-    const ab = await toArrayBuffer(buffer);
+    const ab = await c.toArrayBuffer(buffer);
     await fs.writeAll("/sample.jpg", ab);
     const stats = await fs.stat("/sample.jpg");
     expect(stats.size).toBe(nodeStats.size);
