@@ -5,6 +5,7 @@ import {
   NoModificationAllowedError,
   OpenWriteOptions,
   SeekOrigin,
+  Source,
 } from "isomorphic-fs";
 import { NodeFile } from "./NodeFile";
 import { convertError } from "./NodeFileSystem";
@@ -42,7 +43,7 @@ export class NodeWriteStream extends AbstractWriteStream {
     });
   }
 
-  public async _write(buffer: ArrayBuffer | Uint8Array): Promise<void> {
+  public async _write(src: Source): Promise<number> {
     if (this.options.append) {
       await this.seek(0, SeekOrigin.End);
     } else {
@@ -50,15 +51,15 @@ export class NodeWriteStream extends AbstractWriteStream {
     }
 
     const writeStream = this.writeStream as fs.WriteStream;
-    return new Promise<void>(async (resolve, reject) => {
-      const nodeBuffer = await this.converter.toBuffer(buffer);
+    return new Promise<number>(async (resolve, reject) => {
+      const nodeBuffer = await this.converter.toBuffer(src);
       writeStream.write(nodeBuffer, (err) => {
         if (err) {
           const file = this.file;
           reject(convertError(file.fs.repository, file.path, err, true));
           return;
         }
-        resolve();
+        resolve(nodeBuffer.byteLength);
       });
     });
   }
