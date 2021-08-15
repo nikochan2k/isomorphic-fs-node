@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { AbstractReadStream, OpenOptions } from "isomorphic-fs";
+import { AbstractReadStream, OpenOptions, Source } from "isomorphic-fs";
 import { NodeFile } from "./NodeFile";
 import { convertError } from "./NodeFileSystem";
 
@@ -14,9 +14,9 @@ export class NodeReadStream extends AbstractReadStream {
     this._destory();
   }
 
-  public _read(size?: number): Promise<Uint8Array | null> {
+  public _read(size?: number): Promise<Source | null> {
     const readStream = this._buildReadStream();
-    return new Promise<Uint8Array | null>((resolve, reject) => {
+    return new Promise<Source | null>((resolve, reject) => {
       const file = this.file;
       const onError = (err: Error) => {
         reject(convertError(file.fs.repository, file.path, err, false));

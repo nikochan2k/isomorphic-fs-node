@@ -4,7 +4,7 @@ import {
   AbstractFileSystem,
   AbstractReadStream,
   AbstractWriteStream,
-  OpenOptions,
+  OpenReadOptions,
   OpenWriteOptions,
   path,
 } from "isomorphic-fs";
@@ -22,7 +22,7 @@ export class NodeFile extends AbstractFile {
   }
 
   public async _createReadStream(
-    options: OpenOptions
+    options: OpenReadOptions
   ): Promise<AbstractReadStream> {
     return new NodeReadStream(this, options);
   }
