@@ -6,7 +6,7 @@ import { convertError } from "./NodeFileSystem";
 export class NodeReadStream extends AbstractReadStream {
   private readStream?: fs.ReadStream;
 
-  constructor(private file: NodeFile, options: OpenOptions) {
+  constructor(file: NodeFile, options: OpenOptions) {
     super(file, options);
   }
 
@@ -17,9 +17,9 @@ export class NodeReadStream extends AbstractReadStream {
   public _read(size?: number): Promise<Uint8Array | null> {
     const readStream = this._buildReadStream();
     return new Promise<Uint8Array | null>((resolve, reject) => {
-      const fso = this.fso;
+      const file = this.file;
       const onError = (err: Error) => {
-        reject(convertError(fso.fs.repository, fso.path, err, false));
+        reject(convertError(file.fs.repository, file.path, err, false));
         this._destory();
       };
       readStream.on("error", onError);
@@ -55,11 +55,12 @@ export class NodeReadStream extends AbstractReadStream {
       }
     }
 
-    const fso = this.fso;
-    const repository = fso.fs.repository;
-    const path = fso.path;
+    const file = this.file;
+    const repository = file.fs.repository;
+    const path = file.path;
     try {
-      this.readStream = fs.createReadStream(this.file._getFullPath(), {
+      const nodeFile = this.file as NodeFile;
+      this.readStream = fs.createReadStream(nodeFile._getFullPath(), {
         flags: "r",
         highWaterMark: this.bufferSize,
         start,

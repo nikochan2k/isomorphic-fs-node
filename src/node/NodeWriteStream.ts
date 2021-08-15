@@ -12,7 +12,7 @@ import { convertError } from "./NodeFileSystem";
 export class NodeWriteStream extends AbstractWriteStream {
   private writeStream?: fs.WriteStream;
 
-  constructor(private file: NodeFile, options: OpenWriteOptions) {
+  constructor(file: NodeFile, options: OpenWriteOptions) {
     super(file, options);
   }
 
@@ -24,14 +24,14 @@ export class NodeWriteStream extends AbstractWriteStream {
     this._destory();
 
     return new Promise<void>((resolve, reject) => {
-      fs.truncate(this.file._getFullPath(), len, (e) => {
+      const nodeFile = this.file as NodeFile;
+      fs.truncate(nodeFile._getFullPath(), len, (e) => {
         if (e) {
-          const fso = this.fso;
           reject(
             createError({
               name: NoModificationAllowedError.name,
-              repository: fso.fs.repository,
-              path: fso.path,
+              repository: nodeFile.fs.repository,
+              path: nodeFile.path,
               e,
             })
           );
@@ -54,8 +54,8 @@ export class NodeWriteStream extends AbstractWriteStream {
       const nodeBuffer = await this.converter.toBuffer(buffer);
       writeStream.write(nodeBuffer, (err) => {
         if (err) {
-          const fso = this.fso;
-          reject(convertError(fso.fs.repository, fso.path, err, true));
+          const file = this.file;
+          reject(convertError(file.fs.repository, file.path, err, true));
           return;
         }
         resolve();
@@ -77,16 +77,16 @@ export class NodeWriteStream extends AbstractWriteStream {
       }
     }
 
-    const fso = this.fso;
+    const nodeFile = this.file as NodeFile;
     try {
-      this.writeStream = fs.createWriteStream(this.file._getFullPath(), {
+      this.writeStream = fs.createWriteStream(nodeFile._getFullPath(), {
         flags: start ? "a" : "w",
         highWaterMark: this.bufferSize,
         start,
       });
       return this.writeStream;
     } catch (e) {
-      throw convertError(fso.fs.repository, fso.path, e, true);
+      throw convertError(nodeFile.fs.repository, nodeFile.path, e, true);
     }
   }
 
