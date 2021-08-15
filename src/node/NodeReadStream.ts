@@ -1,12 +1,17 @@
 import * as fs from "fs";
-import { AbstractReadStream, OpenOptions, Source } from "isomorphic-fs";
+import {
+  AbstractReadStream,
+  OpenReadOptions,
+  Source,
+  SourceType,
+} from "isomorphic-fs";
 import { NodeFile } from "./NodeFile";
 import { convertError } from "./NodeFileSystem";
 
 export class NodeReadStream extends AbstractReadStream {
   private readStream?: fs.ReadStream;
 
-  constructor(file: NodeFile, options: OpenOptions) {
+  constructor(file: NodeFile, options: OpenReadOptions) {
     super(file, options);
   }
 
@@ -44,6 +49,10 @@ export class NodeReadStream extends AbstractReadStream {
   public async _seek(start: number): Promise<void> {
     this._destory();
     this._buildReadStream(start);
+  }
+
+  protected getDefaultSourceType(): SourceType {
+    return "Buffer";
   }
 
   private _buildReadStream(start?: number) {
