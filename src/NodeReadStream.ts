@@ -4,7 +4,7 @@ import {
   OpenReadOptions,
   Source,
   SourceType,
-} from "isomorphic-fs";
+} from "univ-fs";
 import { NodeFile } from "./NodeFile";
 import { convertError } from "./NodeFileSystem";
 

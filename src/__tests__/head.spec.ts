@@ -1,5 +1,5 @@
-import { NodeFileSystem } from "../node/NodeFileSystem";
-import { testAll } from "isomorphic-fs/lib/__tests__/head";
+import { NodeFileSystem } from "../NodeFileSystem";
+import { testAll } from "univ-fs/lib/__tests__/head";
 import { getRootDir } from "./init";
 
 const fs = new NodeFileSystem(getRootDir());

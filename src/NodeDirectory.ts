@@ -1,9 +1,6 @@
 import * as fs from "fs";
-import { AbstractDirectory, AbstractFileSystem } from "isomorphic-fs";
-import { path } from "isomorphic-fs";
+import { AbstractDirectory, AbstractFileSystem, joinPaths } from "univ-fs";
 import { convertError } from "./NodeFileSystem";
-
-const { joinPaths } = path;
 
 export class NodeDirectory extends AbstractDirectory {
   public override toString = this.getFullPath;

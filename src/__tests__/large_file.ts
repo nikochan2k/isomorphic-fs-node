@@ -1,5 +1,5 @@
 import { readFileSync, statSync } from "fs";
-import { FileSystem } from "isomorphic-fs";
+import { FileSystem } from "univ-fs";
 import path from "path";
 
 export const testAll = (fs: FileSystem) => {

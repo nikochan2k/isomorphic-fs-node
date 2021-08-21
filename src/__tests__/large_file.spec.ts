@@ -1,4 +1,4 @@
-import { NodeFileSystem } from "../node/NodeFileSystem";
+import { NodeFileSystem } from "../NodeFileSystem";
 import { testAll } from "./large_file";
 import { getRootDir } from "./init";
 

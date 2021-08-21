@@ -6,7 +6,7 @@ import {
   OpenWriteOptions,
   SeekOrigin,
   Source,
-} from "isomorphic-fs";
+} from "univ-fs";
 import { NodeFile } from "./NodeFile";
 import { convertError } from "./NodeFileSystem";
 
