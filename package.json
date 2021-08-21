@@ -14,7 +14,7 @@
     "storage",
     "isomorphic",
     "universal",
-    "indexeddb"
+    "node"
   ],
   "scripts": {
     "clean": "rimraf ./lib",
