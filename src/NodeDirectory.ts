@@ -45,18 +45,6 @@ export class NodeDirectory extends AbstractDirectory {
     });
   }
 
-  public _rmdirRecursively(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      fs.rmdir(this.getFullPath(), { recursive: true }, (err) => {
-        if (err) {
-          reject(convertError(this.fs.repository, this.path, err, true));
-        } else {
-          resolve();
-        }
-      });
-    });
-  }
-
   private getFullPath() {
     return joinPaths(this.fs.repository, this.path);
   }
