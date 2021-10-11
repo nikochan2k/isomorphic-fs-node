@@ -13,8 +13,8 @@ import { convertError } from "./NodeFileSystem";
 export class NodeWriteStream extends AbstractWriteStream {
   private writeStream?: fs.WriteStream;
 
-  constructor(file: NodeFile, options: OpenWriteOptions) {
-    super(file, options);
+  constructor(private nodeFile: NodeFile, options: OpenWriteOptions) {
+    super(nodeFile, options);
   }
 
   public async _close(): Promise<void> {
@@ -25,7 +25,7 @@ export class NodeWriteStream extends AbstractWriteStream {
     this._destory();
 
     return new Promise<void>((resolve, reject) => {
-      const nodeFile = this.file as NodeFile;
+      const nodeFile = this.nodeFile;
       fs.truncate(nodeFile._getFullPath(), len, (e) => {
         if (e) {
           reject(
@@ -78,7 +78,7 @@ export class NodeWriteStream extends AbstractWriteStream {
       }
     }
 
-    const nodeFile = this.file as NodeFile;
+    const nodeFile = this.nodeFile;
     try {
       this.writeStream = fs.createWriteStream(nodeFile._getFullPath(), {
         flags: start ? "a" : "w",
