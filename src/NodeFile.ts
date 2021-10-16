@@ -26,7 +26,6 @@ export class NodeFile extends AbstractFile {
   }
 
   public async _createWriteStream(
-    _post: boolean,
     options: OpenWriteOptions
   ): Promise<AbstractWriteStream> {
     return new NodeWriteStream(this, options);

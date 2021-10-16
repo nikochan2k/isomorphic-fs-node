@@ -80,8 +80,9 @@ export class NodeWriteStream extends AbstractWriteStream {
 
     const nodeFile = this.nodeFile;
     try {
+      const flags = (start ? "a" : "w") + (this.options.create ? "" : "x");
       this.writeStream = fs.createWriteStream(nodeFile._getFullPath(), {
-        flags: start ? "a" : "w",
+        flags,
         highWaterMark: this.bufferSize,
         start,
       });
@@ -98,6 +99,6 @@ export class NodeWriteStream extends AbstractWriteStream {
 
     this.writeStream.removeAllListeners();
     this.writeStream.destroy();
-    this.writeStream = undefined;
+    delete this.writeStream;
   }
 }
