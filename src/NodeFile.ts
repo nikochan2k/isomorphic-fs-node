@@ -7,6 +7,7 @@ import {
   OpenReadOptions,
   OpenWriteOptions,
   joinPaths,
+  SeekOrigin,
 } from "univ-fs";
 import { convertError } from "./NodeFileSystem";
 import { NodeReadStream } from "./NodeReadStream";
@@ -28,7 +29,17 @@ export class NodeFile extends AbstractFile {
   public async _createWriteStream(
     options: OpenWriteOptions
   ): Promise<AbstractWriteStream> {
-    return new NodeWriteStream(this, options);
+    const ws = new NodeWriteStream(this, options);
+    if (options.create) {
+      ws._buildWriteStream();
+    } else {
+      if (options.append) {
+        await ws.seek(0, SeekOrigin.End);
+      } else {
+        ws._buildWriteStream();
+      }
+    }
+    return ws;
   }
 
   public _getFullPath() {

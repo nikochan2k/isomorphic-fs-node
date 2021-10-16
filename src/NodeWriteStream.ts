@@ -4,7 +4,6 @@ import {
   createError,
   NoModificationAllowedError,
   OpenWriteOptions,
-  SeekOrigin,
   Source,
 } from "univ-fs";
 import { NodeFile } from "./NodeFile";
@@ -15,6 +14,31 @@ export class NodeWriteStream extends AbstractWriteStream {
 
   constructor(private nodeFile: NodeFile, options: OpenWriteOptions) {
     super(nodeFile, options);
+  }
+
+  public _buildWriteStream(start?: number) {
+    const writeStream = this.writeStream;
+    if (writeStream && !writeStream.destroyed) {
+      if (start != null) {
+        this._destory();
+      } else {
+        return writeStream;
+      }
+    }
+
+    const nodeFile = this.nodeFile;
+    try {
+      const flags =
+        (start != null ? "a" : "w") + (this.options.create ? "" : "x");
+      this.writeStream = fs.createWriteStream(nodeFile._getFullPath(), {
+        flags,
+        highWaterMark: this.bufferSize,
+        start,
+      });
+      return this.writeStream;
+    } catch (e) {
+      throw convertError(nodeFile.fs.repository, nodeFile.path, e, true);
+    }
   }
 
   public async _close(): Promise<void> {
@@ -44,12 +68,6 @@ export class NodeWriteStream extends AbstractWriteStream {
   }
 
   public async _write(src: Source): Promise<number> {
-    if (this.options.append) {
-      await this.seek(0, SeekOrigin.End);
-    } else {
-      this._buildWriteStream();
-    }
-
     const writeStream = this.writeStream as fs.WriteStream;
     return new Promise<number>(async (resolve, reject) => {
       const nodeBuffer = await this.converter.toBuffer(src);
@@ -66,30 +84,6 @@ export class NodeWriteStream extends AbstractWriteStream {
 
   protected async _seek(start: number): Promise<void> {
     this._buildWriteStream(start);
-  }
-
-  private _buildWriteStream(start?: number) {
-    const writeStream = this.writeStream;
-    if (writeStream && !writeStream.destroyed) {
-      if (start) {
-        this._destory();
-      } else {
-        return writeStream;
-      }
-    }
-
-    const nodeFile = this.nodeFile;
-    try {
-      const flags = (start ? "a" : "w") + (this.options.create ? "" : "x");
-      this.writeStream = fs.createWriteStream(nodeFile._getFullPath(), {
-        flags,
-        highWaterMark: this.bufferSize,
-        start,
-      });
-      return this.writeStream;
-    } catch (e) {
-      throw convertError(nodeFile.fs.repository, nodeFile.path, e, true);
-    }
   }
 
   private async _destory(): Promise<void> {
