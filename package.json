@@ -1,6 +1,6 @@
 {
   "name": "univ-fs-node",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Isomorphic Filesystem for Node",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
