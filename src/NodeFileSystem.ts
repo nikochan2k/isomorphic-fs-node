@@ -183,7 +183,15 @@ export class NodeFileSystem extends AbstractFileSystem {
     return new NodeFile(this, path);
   }
 
-  public async toURL(path: string, _urlType?: URLType): Promise<string> {
+  public async toURL(path: string, urlType?: URLType): Promise<string> {
+    if (urlType !== "GET") {
+      throw createError({
+        name: NotSupportedError.name,
+        repository: this.repository,
+        path,
+        e: `"${urlType}" is not supported`,
+      });
+    }
     return pathToFileURL(this.getFullPath(path)).href;
   }
 
