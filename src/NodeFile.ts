@@ -46,7 +46,7 @@ export class NodeFile extends AbstractFile {
 
   protected async _write(src: Source, options: WriteOptions): Promise<void> {
     try {
-      const flags = (options.append ? "a" : "w") + (options.create ? "" : "x");
+      const flags = (options.append ? "a" : "w") + (options.create ? "x" : "");
       const writable = fs.createWriteStream(this._getFullPath(), {
         flags,
         highWaterMark: options.bufferSize,
