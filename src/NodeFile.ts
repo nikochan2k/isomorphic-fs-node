@@ -1,45 +1,19 @@
 import * as fs from "fs";
+import { Source } from "univ-conv";
 import {
   AbstractFile,
   AbstractFileSystem,
-  AbstractReadStream,
-  AbstractWriteStream,
-  OpenReadOptions,
-  OpenWriteOptions,
   joinPaths,
-  SeekOrigin,
+  OpenOptions,
+  WriteOptions,
 } from "univ-fs";
 import { convertError } from "./NodeFileSystem";
-import { NodeReadStream } from "./NodeReadStream";
-import { NodeWriteStream } from "./NodeWriteStream";
 
 export class NodeFile extends AbstractFile {
   public override toString = this._getFullPath;
 
   constructor(fs: AbstractFileSystem, path: string) {
     super(fs, path);
-  }
-
-  public async _createReadStream(
-    options: OpenReadOptions
-  ): Promise<AbstractReadStream> {
-    return new NodeReadStream(this, options);
-  }
-
-  public async _createWriteStream(
-    options: OpenWriteOptions
-  ): Promise<AbstractWriteStream> {
-    const ws = new NodeWriteStream(this, options);
-    if (options.create) {
-      ws._buildWriteStream();
-    } else {
-      if (options.append) {
-        await ws.seek(0, SeekOrigin.End);
-      } else {
-        ws._buildWriteStream();
-      }
-    }
-    return ws;
   }
 
   public _getFullPath() {
@@ -56,5 +30,31 @@ export class NodeFile extends AbstractFile {
         }
       });
     });
+  }
+
+  protected async _getSource(options: OpenOptions): Promise<Source> {
+    try {
+      const stream = fs.createReadStream(this._getFullPath(), {
+        flags: "r",
+        highWaterMark: options.bufferSize,
+      });
+      return stream;
+    } catch (e) {
+      throw convertError(this.fs.repository, this.path, e, false);
+    }
+  }
+
+  protected async _write(src: Source, options: WriteOptions): Promise<void> {
+    try {
+      const flags = (options.append ? "a" : "w") + (options.create ? "" : "x");
+      const writable = fs.createWriteStream(this._getFullPath(), {
+        flags,
+        highWaterMark: options.bufferSize,
+      });
+      const converter = this._getConverter(options.bufferSize);
+      await converter.pipe(src, writable);
+    } catch (e) {
+      throw convertError(this.fs.repository, this.path, e, true);
+    }
   }
 }

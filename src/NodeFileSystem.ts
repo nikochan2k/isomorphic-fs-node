@@ -7,20 +7,20 @@ import {
   FileSystemOptions,
   HeadOptions,
   InvalidModificationError,
+  joinPaths,
   NoModificationAllowedError,
+  normalizePath,
   NotFoundError,
   NotReadableError,
   NotSupportedError,
   PatchOptions,
+  PathExistError,
   Props,
   QuotaExceededError,
-  SecurityError,
   Stats,
   SyntaxError,
   TypeMismatchError,
   URLType,
-  joinPaths,
-  normalizePath,
 } from "univ-fs";
 import { pathToFileURL } from "url";
 import { NodeDirectory } from "./NodeDirectory";
@@ -58,7 +58,7 @@ export function convertError(
       });
     case "EEXIST": // File exists
       return createError({
-        name: SecurityError.name,
+        name: PathExistError.name,
         repository,
         path,
         e: err,
