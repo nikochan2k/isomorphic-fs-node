@@ -1,6 +1,6 @@
 {
   "name": "univ-fs-node",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "Universal Filesystem for Node",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
