@@ -5,7 +5,6 @@ import {
   AbstractFileSystem,
   createError,
   FileSystemOptions,
-  HeadOptions,
   InvalidModificationError,
   joinPaths,
   NoModificationAllowedError,
@@ -109,7 +108,7 @@ export class NodeFileSystem extends AbstractFileSystem {
     fs.mkdirSync(rootDir, { recursive: true });
   }
 
-  public _head(path: string, _options: HeadOptions): Promise<Stats> {
+  public _head(path: string): Promise<Stats> {
     return new Promise<Stats>((resolve, reject) => {
       fs.stat(this.getFullPath(path), (err, stats) => {
         if (err) {
