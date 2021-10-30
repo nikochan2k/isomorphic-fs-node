@@ -1,3 +1,3 @@
-# isomorphic-fs-node
+# univ-fs-node
 
-The isomorphic FileSystem API for Node.
+The universal Filesystem API for Node.

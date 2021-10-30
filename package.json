@@ -1,7 +1,7 @@
 {
   "name": "univ-fs-node",
   "version": "0.1.16",
-  "description": "Universal Filesystem for Node",
+  "description": "The universal Filesystem for Node",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "typings": "lib/index.d.ts",
@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "tslib": "^2.3.1",
-    "univ-fs": "^0.2.15"
+    "univ-fs": "^0.2.16"
   },
   "author": "Yoshihiro Seki",
   "license": "MIT"
