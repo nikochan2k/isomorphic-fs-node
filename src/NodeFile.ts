@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { Source } from "univ-conv";
+import { Data } from "univ-conv";
 import {
   AbstractFile,
   AbstractFileSystem,
@@ -32,7 +32,7 @@ export class NodeFile extends AbstractFile {
     });
   }
 
-  protected async _getSource(options: OpenOptions): Promise<Source> {
+  protected async _getData(options: OpenOptions): Promise<Data> {
     try {
       const stream = fs.createReadStream(this._getFullPath(), {
         flags: "r",
@@ -44,7 +44,7 @@ export class NodeFile extends AbstractFile {
     }
   }
 
-  protected async _write(src: Source, options: WriteOptions): Promise<void> {
+  protected async _write(data: Data, options: WriteOptions): Promise<void> {
     try {
       const flags = (options.append ? "a" : "w") + (options.create ? "x" : "");
       const writable = fs.createWriteStream(this._getFullPath(), {
@@ -52,7 +52,7 @@ export class NodeFile extends AbstractFile {
         highWaterMark: options.bufferSize,
       });
       const converter = this._getConverter(options.bufferSize);
-      await converter.pipe(src, writable);
+      await converter.pipe(data, writable);
     } catch (e) {
       throw convertError(this.fs.repository, this.path, e, true);
     }
