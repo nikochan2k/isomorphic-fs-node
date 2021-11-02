@@ -10,8 +10,6 @@ import {
 import { convertError } from "./NodeFileSystem";
 
 export class NodeFile extends AbstractFile {
-  public override toString = this._getFullPath;
-
   constructor(fs: AbstractFileSystem, path: string) {
     super(fs, path);
   }
@@ -32,19 +30,24 @@ export class NodeFile extends AbstractFile {
     });
   }
 
-  protected async _getData(options: OpenOptions): Promise<Data> {
+  protected async _load(options: OpenOptions): Promise<Data> {
     try {
       const stream = fs.createReadStream(this._getFullPath(), {
         flags: "r",
         highWaterMark: options.bufferSize,
       });
-      return stream;
-    } catch (e) {
-      throw convertError(this.fs.repository, this.path, e, false);
+      return Promise.resolve(stream);
+    } catch (e: unknown) {
+      throw convertError(
+        this.fs.repository,
+        this.path,
+        e as NodeJS.ErrnoException,
+        false
+      );
     }
   }
 
-  protected async _write(data: Data, options: WriteOptions): Promise<void> {
+  protected async _save(data: Data, options: WriteOptions): Promise<void> {
     try {
       const flags = (options.append ? "a" : "w") + (options.create ? "x" : "");
       const writable = fs.createWriteStream(this._getFullPath(), {
@@ -54,7 +57,12 @@ export class NodeFile extends AbstractFile {
       const converter = this._getConverter(options.bufferSize);
       await converter.pipe(data, writable);
     } catch (e) {
-      throw convertError(this.fs.repository, this.path, e, true);
+      throw convertError(
+        this.fs.repository,
+        this.path,
+        e as NodeJS.ErrnoException,
+        true
+      );
     }
   }
 }

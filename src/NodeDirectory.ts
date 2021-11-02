@@ -3,8 +3,6 @@ import { AbstractDirectory, AbstractFileSystem, joinPaths } from "univ-fs";
 import { convertError } from "./NodeFileSystem";
 
 export class NodeDirectory extends AbstractDirectory {
-  public override toString = this.getFullPath;
-
   constructor(fs: AbstractFileSystem, path: string) {
     super(fs, path);
   }

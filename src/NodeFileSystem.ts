@@ -4,6 +4,7 @@ import {
   AbstractFile,
   AbstractFileSystem,
   createError,
+  ErrorLike,
   FileSystemOptions,
   InvalidModificationError,
   joinPaths,
@@ -31,12 +32,13 @@ export function convertError(
   err: NodeJS.ErrnoException,
   write: boolean
 ) {
+  const e = err as ErrorLike;
   const code = err.code;
   if (!code) {
     return createError({
       repository,
       path,
-      e: err,
+      e,
     });
   }
   switch (code) {
@@ -45,7 +47,7 @@ export function convertError(
         name: NotFoundError.name,
         repository,
         path,
-        e: err,
+        e,
       });
     case "ENOTDIR": // Not a directory
     case "EISDIR": // Is a directory
@@ -53,28 +55,28 @@ export function convertError(
         name: TypeMismatchError.name,
         repository,
         path,
-        e: err,
+        e,
       });
     case "EEXIST": // File exists
       return createError({
         name: PathExistError.name,
         repository,
         path,
-        e: err,
+        e,
       });
     case "EDQUOT": // Quota exceeded
       return createError({
         name: QuotaExceededError.name,
         repository,
         path,
-        e: err,
+        e,
       });
     case "EINVAL": // Invalid argument
       return createError({
         name: SyntaxError.name,
         repository,
         path,
-        e: err,
+        e,
       });
   }
   if (0 <= code.indexOf("NOSUPPORT")) {
@@ -82,7 +84,7 @@ export function convertError(
       name: NotSupportedError.name,
       repository,
       path,
-      e: err,
+      e,
     });
   }
   if (write) {
@@ -90,14 +92,14 @@ export function convertError(
       name: NoModificationAllowedError.name,
       repository,
       path,
-      e: err,
+      e,
     });
   } else {
     return createError({
       name: NotReadableError.name,
       repository,
       path,
-      e: err,
+      e,
     });
   }
 }
@@ -134,7 +136,7 @@ export class NodeFileSystem extends AbstractFileSystem {
   public _patch(
     path: string,
     props: Props,
-    _options: PatchOptions
+    _options: PatchOptions // eslint-disable-line
   ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       if (typeof props.accessed !== "number") {
@@ -143,7 +145,7 @@ export class NodeFileSystem extends AbstractFileSystem {
             name: InvalidModificationError.name,
             repository: this.repository,
             path,
-            e: "No accessed time",
+            e: { message: "No accessed time" },
           })
         );
         return;
@@ -154,7 +156,7 @@ export class NodeFileSystem extends AbstractFileSystem {
             name: InvalidModificationError.name,
             repository: this.repository,
             path,
-            e: "No modified time",
+            e: { message: "No modified time" },
           })
         );
         return;
@@ -175,11 +177,11 @@ export class NodeFileSystem extends AbstractFileSystem {
   }
 
   public async getDirectory(path: string): Promise<AbstractDirectory> {
-    return new NodeDirectory(this, path);
+    return Promise.resolve(new NodeDirectory(this, path));
   }
 
   public async getFile(path: string): Promise<AbstractFile> {
-    return new NodeFile(this, path);
+    return Promise.resolve(new NodeFile(this, path));
   }
 
   public async toURL(path: string, urlType?: URLType): Promise<string> {
@@ -188,10 +190,10 @@ export class NodeFileSystem extends AbstractFileSystem {
         name: NotSupportedError.name,
         repository: this.repository,
         path,
-        e: `"${urlType}" is not supported`,
+        e: { message: `"${urlType || "undefined"}" is not supported` },
       });
     }
-    return pathToFileURL(this.getFullPath(path)).href;
+    return Promise.resolve(pathToFileURL(this.getFullPath(path)).href);
   }
 
   protected getFullPath(path: string) {
