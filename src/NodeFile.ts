@@ -31,7 +31,7 @@ export class NodeFile extends AbstractFile {
     });
   }
 
-  protected async _load(options: OpenOptions): Promise<Data> {
+  protected async _load(_stats: Stats, options: OpenOptions): Promise<Data> {
     try {
       const stream = fs.createReadStream(this._getFullPath(), {
         flags: "r",
