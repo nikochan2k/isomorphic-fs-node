@@ -6,7 +6,6 @@ import {
   createError,
   ErrorLike,
   FileSystemOptions,
-  InvalidModificationError,
   joinPaths,
   NoModificationAllowedError,
   normalizePath,
@@ -20,7 +19,7 @@ import {
   Stats,
   SyntaxError,
   TypeMismatchError,
-  URLType,
+  URLOptions,
 } from "univ-fs";
 import { pathToFileURL } from "url";
 import { NodeDirectory } from "./NodeDirectory";
@@ -139,32 +138,10 @@ export class NodeFileSystem extends AbstractFileSystem {
     _options: PatchOptions // eslint-disable-line
   ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      if (typeof props.accessed !== "number") {
-        reject(
-          createError({
-            name: InvalidModificationError.name,
-            repository: this.repository,
-            path,
-            e: { message: "No accessed time" },
-          })
-        );
-        return;
-      }
-      if (typeof props.modified !== "number") {
-        reject(
-          createError({
-            name: InvalidModificationError.name,
-            repository: this.repository,
-            path,
-            e: { message: "No modified time" },
-          })
-        );
-        return;
-      }
       fs.utimes(
         this.getFullPath(path),
-        props.accessed,
-        props.modified,
+        props["accessed"] as number,
+        props["modified"] as number,
         (err) => {
           if (err) {
             reject(convertError(this.repository, path, err, true));
@@ -176,21 +153,22 @@ export class NodeFileSystem extends AbstractFileSystem {
     });
   }
 
-  public async getDirectory(path: string): Promise<AbstractDirectory> {
+  public async _getDirectory(path: string): Promise<AbstractDirectory> {
     return Promise.resolve(new NodeDirectory(this, path));
   }
 
-  public async getFile(path: string): Promise<AbstractFile> {
+  public async _getFile(path: string): Promise<AbstractFile> {
     return Promise.resolve(new NodeFile(this, path));
   }
 
-  public async toURL(path: string, urlType?: URLType): Promise<string> {
-    if (urlType !== "GET") {
+  public async _toURL(path: string, options?: URLOptions): Promise<string> {
+    options = { urlType: "GET", ...options };
+    if (options.urlType !== "GET") {
       throw createError({
         name: NotSupportedError.name,
         repository: this.repository,
         path,
-        e: { message: `"${urlType || "undefined"}" is not supported` },
+        e: { message: `"${options.urlType}" is not supported` }, // eslint-disable-line
       });
     }
     return Promise.resolve(pathToFileURL(this.getFullPath(path)).href);

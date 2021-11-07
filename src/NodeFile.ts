@@ -5,6 +5,7 @@ import {
   AbstractFileSystem,
   joinPaths,
   OpenOptions,
+  Stats,
   WriteOptions,
 } from "univ-fs";
 import { convertError } from "./NodeFileSystem";
@@ -47,7 +48,11 @@ export class NodeFile extends AbstractFile {
     }
   }
 
-  protected async _save(data: Data, options: WriteOptions): Promise<void> {
+  protected async _save(
+    data: Data,
+    _stats: Stats | undefined, // eslint-disable-line
+    options: WriteOptions
+  ): Promise<void> {
     try {
       const flags = (options.append ? "a" : "w") + (options.create ? "x" : "");
       const writable = fs.createWriteStream(this._getFullPath(), {
