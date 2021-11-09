@@ -161,16 +161,11 @@ export class NodeFileSystem extends AbstractFileSystem {
     return Promise.resolve(new NodeFile(this, path));
   }
 
-  public async _toURL(path: string, options?: URLOptions): Promise<string> {
-    options = { urlType: "GET", ...options };
-    if (options.urlType !== "GET") {
-      throw createError({
-        name: NotSupportedError.name,
-        repository: this.repository,
-        path,
-        e: { message: `"${options.urlType}" is not supported` }, // eslint-disable-line
-      });
-    }
+  public async _toURL(
+    path: string,
+    _isDirectory: boolean, // eslint-disable-line
+    _options?: URLOptions // eslint-disable-line
+  ): Promise<string> {
     return Promise.resolve(pathToFileURL(this.getFullPath(path)).href);
   }
 
