@@ -4,7 +4,7 @@ import {
   AbstractFile,
   AbstractFileSystem,
   joinPaths,
-  OpenOptions,
+  ReadOptions,
   Stats,
   WriteOptions,
 } from "univ-fs";
@@ -31,7 +31,7 @@ export class NodeFile extends AbstractFile {
     });
   }
 
-  protected async _load(_stats: Stats, options: OpenOptions): Promise<Data> {
+  protected async _load(_stats: Stats, options: ReadOptions): Promise<Data> {
     try {
       const stream = fs.createReadStream(this._getFullPath(), {
         flags: "r",
@@ -59,7 +59,7 @@ export class NodeFile extends AbstractFile {
         flags,
         highWaterMark: options.bufferSize,
       });
-      const converter = this._getConverter(options.bufferSize);
+      const converter = this._getConverter();
       await converter.pipe(data, writable);
     } catch (e) {
       throw convertError(
