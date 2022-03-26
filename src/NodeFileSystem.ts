@@ -109,6 +109,14 @@ export class NodeFileSystem extends AbstractFileSystem {
     fs.mkdirSync(rootDir, { recursive: true });
   }
 
+  public async _getDirectory(path: string): Promise<AbstractDirectory> {
+    return Promise.resolve(new NodeDirectory(this, path));
+  }
+
+  public async _getFile(path: string): Promise<AbstractFile> {
+    return Promise.resolve(new NodeFile(this, path));
+  }
+
   public _head(path: string): Promise<Stats> {
     return new Promise<Stats>((resolve, reject) => {
       fs.stat(this.getFullPath(path), (err, stats) => {
@@ -153,20 +161,16 @@ export class NodeFileSystem extends AbstractFileSystem {
     });
   }
 
-  public async _getDirectory(path: string): Promise<AbstractDirectory> {
-    return Promise.resolve(new NodeDirectory(this, path));
-  }
-
-  public async _getFile(path: string): Promise<AbstractFile> {
-    return Promise.resolve(new NodeFile(this, path));
-  }
-
   public async _toURL(
     path: string,
     _isDirectory: boolean, // eslint-disable-line
     _options?: URLOptions // eslint-disable-line
   ): Promise<string> {
     return Promise.resolve(pathToFileURL(this.getFullPath(path)).href);
+  }
+
+  public supportDirectory(): boolean {
+    return true;
   }
 
   protected getFullPath(path: string) {
