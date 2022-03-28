@@ -1,5 +1,10 @@
 import * as fs from "fs";
-import { AbstractDirectory, AbstractFileSystem, joinPaths } from "univ-fs";
+import {
+  AbstractDirectory,
+  AbstractFileSystem,
+  Item,
+  joinPaths,
+} from "univ-fs";
 import { convertError } from "./NodeFileSystem";
 
 export class NodeDirectory extends AbstractDirectory {
@@ -7,13 +12,17 @@ export class NodeDirectory extends AbstractDirectory {
     super(fs, path);
   }
 
-  public _list(): Promise<string[]> {
-    return new Promise<string[]>((resolve, reject) => {
+  public _list(): Promise<Item[]> {
+    return new Promise<Item[]>((resolve, reject) => {
       fs.readdir(this.getFullPath(), (err, names) => {
         if (err) {
           reject(convertError(this.fs.repository, this.path, err, false));
         } else {
-          resolve(names.map((name) => joinPaths(this.path, name)));
+          resolve(
+            names.map((name) => {
+              return { path: joinPaths(this.path, name) };
+            })
+          );
         }
       });
     });
