@@ -14,7 +14,6 @@ import {
   NotSupportedError,
   PatchOptions,
   PathExistError,
-  Props,
   QuotaExceededError,
   Stats,
   SyntaxError,
@@ -142,14 +141,15 @@ export class NodeFileSystem extends AbstractFileSystem {
 
   public _patch(
     path: string,
-    props: Props,
+    stats: Stats,
+    props: Stats,
     _options: PatchOptions // eslint-disable-line
   ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       fs.utimes(
         this.getFullPath(path),
-        props["accessed"] as number,
-        props["modified"] as number,
+        props.accessed ?? (stats.accessed as number),
+        props.modified ?? (stats.modified as number),
         (err) => {
           if (err) {
             reject(convertError(this.repository, path, err, true));
@@ -167,6 +167,18 @@ export class NodeFileSystem extends AbstractFileSystem {
     _options?: URLOptions // eslint-disable-line
   ): Promise<string> {
     return Promise.resolve(pathToFileURL(this.getFullPath(path)).href);
+  }
+
+  public canPatchAccessed(): boolean {
+    return true;
+  }
+
+  public canPatchCreated(): boolean {
+    return true;
+  }
+
+  public canPatchModified(): boolean {
+    return true;
   }
 
   public supportDirectory(): boolean {
