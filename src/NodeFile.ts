@@ -31,6 +31,14 @@ export class NodeFile extends AbstractFile {
     });
   }
 
+  public supportRangeRead(): boolean {
+    return true;
+  }
+
+  public supportRangeWrite(): boolean {
+    return true;
+  }
+
   protected async _load(_stats: Stats, options: ReadOptions): Promise<Data> {
     try {
       const stream = fs.createReadStream(this._getFullPath(), {

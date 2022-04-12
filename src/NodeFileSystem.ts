@@ -174,7 +174,7 @@ export class NodeFileSystem extends AbstractFileSystem {
   }
 
   public canPatchCreated(): boolean {
-    return true;
+    return false;
   }
 
   public canPatchModified(): boolean {
