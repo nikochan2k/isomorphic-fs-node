@@ -108,11 +108,11 @@ export class NodeFileSystem extends AbstractFileSystem {
     fs.mkdirSync(rootDir, { recursive: true });
   }
 
-  public async _getDirectory(path: string): Promise<AbstractDirectory> {
+  public _getDirectory(path: string): Promise<AbstractDirectory> {
     return Promise.resolve(new NodeDirectory(this, path));
   }
 
-  public async _getFile(path: string): Promise<AbstractFile> {
+  public _getFile(path: string): Promise<AbstractFile> {
     return Promise.resolve(new NodeFile(this, path));
   }
 
@@ -161,7 +161,7 @@ export class NodeFileSystem extends AbstractFileSystem {
     });
   }
 
-  public async _toURL(
+  public _toURL(
     path: string,
     _isDirectory: boolean, // eslint-disable-line
     _options?: URLOptions // eslint-disable-line

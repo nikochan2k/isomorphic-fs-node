@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { Data } from "univ-conv";
+import { Data, ConvertOptions } from "univ-conv";
 import {
   AbstractFile,
   AbstractFileSystem,
@@ -41,11 +41,20 @@ export class NodeFile extends AbstractFile {
 
   protected async _load(_stats: Stats, options: ReadOptions): Promise<Data> {
     try {
-      const stream = fs.createReadStream(this._getFullPath(), {
+      let readable = fs.createReadStream(this._getFullPath(), {
         flags: "r",
         highWaterMark: options.bufferSize,
+        start: options.start,
       });
-      return Promise.resolve(stream);
+
+      if (0 < (options.length as number)) {
+        const co: Partial<ConvertOptions> = { ...options };
+        delete co.start;
+        const converter = this._getConverter();
+        readable = (await converter.slice(readable, co)) as fs.ReadStream; // eslint-disable-line
+      }
+
+      return readable;
     } catch (e: unknown) {
       throw convertError(
         this.fs.repository,
@@ -66,8 +75,16 @@ export class NodeFile extends AbstractFile {
       const writable = fs.createWriteStream(this._getFullPath(), {
         flags,
         highWaterMark: options.bufferSize,
+        start: options.start,
       });
+
       const converter = this._getConverter();
+      if (0 < (options.length as number)) {
+        const co: Partial<ConvertOptions> = { ...options };
+        delete co.start;
+        data = await converter.slice(data, co);
+      }
+
       await converter.pipe(data, writable);
     } catch (e) {
       throw convertError(
