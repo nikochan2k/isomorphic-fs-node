@@ -31,6 +31,10 @@ export class NodeFile extends AbstractFile {
     });
   }
 
+  public supportAppend(): boolean {
+    return true;
+  }
+
   public supportRangeRead(): boolean {
     return true;
   }
