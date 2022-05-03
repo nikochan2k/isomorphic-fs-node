@@ -17,32 +17,22 @@
     "node"
   ],
   "scripts": {
-    "clean": "rimraf ./lib",
+    "clean": "rimraf ./lib ./tsconfig.tsbuildinfo",
     "compile": "tsc",
     "build": "npm-run-all clean compile",
     "npm-version": "npm version patch",
     "npm-publish": "npm publish",
-    "release": "npm-run-all clean compile npm-version npm-publish",
-    "test": "jest --runInBand"
+    "release": "npm-run-all build npm-version npm-publish",
+    "jest": "jest --runInBand",
+    "test": "npm-run-all compile jest"
   },
   "jest": {
     "moduleFileExtensions": [
-      "js",
-      "ts",
-      "tsx"
+      "js"
     ],
-    "transform": {
-      "^.+\\.(ts|tsx)$": "ts-jest"
-    },
-    "globals": {
-      "ts-jest": {
-        "tsconfig": "tsconfig.json"
-      }
-    },
     "testMatch": [
-      "<rootDir>/src/__tests__/**/*.spec.+(ts|tsx|js)"
-    ],
-    "preset": "ts-jest"
+      "<rootDir>/lib/__tests__/**/*.spec.js"
+    ]
   },
   "devDependencies": {
     "@types/jest": "^27.5.0",
