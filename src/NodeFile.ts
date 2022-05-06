@@ -31,7 +31,7 @@ export class NodeFile extends AbstractFile {
     return true;
   }
 
-  protected async _doRead(_stats: Stats, options: ReadOptions): Promise<Data> {
+  public async _doRead(_stats: Stats, options: ReadOptions): Promise<Data> {
     try {
       let readable = fs.createReadStream(this._getFullPath(), {
         flags: "r",
@@ -57,7 +57,7 @@ export class NodeFile extends AbstractFile {
     }
   }
 
-  protected _doRm(): Promise<void> {
+  public _doRm(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       fs.rm(this._getFullPath(), { force: true }, (err) => {
         if (err) {
@@ -69,7 +69,7 @@ export class NodeFile extends AbstractFile {
     });
   }
 
-  protected async _doWrite(
+  public async _doWrite(
     data: Data,
     _stats: Stats | undefined, // eslint-disable-line
     options: WriteOptions

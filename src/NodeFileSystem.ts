@@ -103,31 +103,15 @@ export class NodeFileSystem extends AbstractFileSystem {
     fs.mkdirSync(rootDir, { recursive: true });
   }
 
-  public canPatchAccessed(): boolean {
-    return true;
-  }
-
-  public canPatchCreated(): boolean {
-    return false;
-  }
-
-  public canPatchModified(): boolean {
-    return true;
-  }
-
-  public supportDirectory(): boolean {
-    return true;
-  }
-
-  protected _doGetDirectory(path: string): Promise<AbstractDirectory> {
+  public _doGetDirectory(path: string): Promise<AbstractDirectory> {
     return Promise.resolve(new NodeDirectory(this, path));
   }
 
-  protected _doGetFile(path: string): Promise<AbstractFile> {
+  public _doGetFile(path: string): Promise<AbstractFile> {
     return Promise.resolve(new NodeFile(this, path));
   }
 
-  protected _doHead(path: string): Promise<Stats> {
+  public _doHead(path: string): Promise<Stats> {
     return new Promise<Stats>((resolve, reject) => {
       fs.stat(this.getFullPath(path), (err, stats) => {
         if (err) {
@@ -150,7 +134,7 @@ export class NodeFileSystem extends AbstractFileSystem {
     });
   }
 
-  protected _doPatch(
+  public _doPatch(
     path: string,
     stats: Stats,
     props: Stats,
@@ -172,12 +156,28 @@ export class NodeFileSystem extends AbstractFileSystem {
     });
   }
 
-  protected _doToURL(
+  public _doToURL(
     path: string,
     _isDirectory: boolean, // eslint-disable-line
     _options?: URLOptions // eslint-disable-line
   ): Promise<string> {
     return Promise.resolve(pathToFileURL(this.getFullPath(path)).href);
+  }
+
+  public canPatchAccessed(): boolean {
+    return true;
+  }
+
+  public canPatchCreated(): boolean {
+    return false;
+  }
+
+  public canPatchModified(): boolean {
+    return true;
+  }
+
+  public supportDirectory(): boolean {
+    return true;
   }
 
   protected getFullPath(path: string) {
