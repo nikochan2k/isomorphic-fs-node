@@ -1,22 +1,17 @@
 import * as fs from "fs";
-import {
-  AbstractDirectory,
-  AbstractFileSystem,
-  Item,
-  joinPaths,
-} from "univ-fs";
-import { convertError } from "./NodeFileSystem";
+import { AbstractDirectory, Item, joinPaths } from "univ-fs";
+import { NodeFileSystem } from "./NodeFileSystem";
 
 export class NodeDirectory extends AbstractDirectory {
-  constructor(fs: AbstractFileSystem, path: string) {
-    super(fs, path);
+  constructor(private nfs: NodeFileSystem, path: string) {
+    super(nfs, path);
   }
 
   public _doList(): Promise<Item[]> {
     return new Promise<Item[]>((resolve, reject) => {
       fs.readdir(this.getFullPath(), (err, names) => {
         if (err) {
-          reject(convertError(this.fs.repository, this.path, err, false));
+          reject(this.nfs._error(this.path, err, false));
         } else {
           resolve(
             names.map((name) => {
@@ -32,7 +27,7 @@ export class NodeDirectory extends AbstractDirectory {
     return new Promise<void>((resolve, reject) => {
       fs.mkdir(this.getFullPath(), { recursive: true }, (err) => {
         if (err) {
-          reject(convertError(this.fs.repository, this.path, err, true));
+          reject(this.nfs._error(this.path, err, true));
         } else {
           resolve();
         }
@@ -44,7 +39,7 @@ export class NodeDirectory extends AbstractDirectory {
     return new Promise<void>((resolve, reject) => {
       fs.rmdir(this.getFullPath(), { recursive: false }, (err) => {
         if (err) {
-          reject(convertError(this.fs.repository, this.path, err, true));
+          reject(this.nfs._error(this.path, err, true));
         } else {
           resolve();
         }

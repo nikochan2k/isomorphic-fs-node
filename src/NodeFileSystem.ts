@@ -24,79 +24,6 @@ import { pathToFileURL } from "url";
 import { NodeDirectory } from "./NodeDirectory";
 import { NodeFile } from "./NodeFile";
 
-export function convertError(
-  repository: string,
-  path: string,
-  err: NodeJS.ErrnoException,
-  write: boolean
-) {
-  const e = err as ErrorLike;
-  const code = err.code;
-  if (code) {
-    switch (code) {
-      case "ENOENT": // No such file or directory
-        return createError({
-          name: NotFoundError.name,
-          repository,
-          path,
-          e,
-        });
-      case "ENOTDIR": // Not a directory
-      case "EISDIR": // Is a directory
-        return createError({
-          name: TypeMismatchError.name,
-          repository,
-          path,
-          e,
-        });
-      case "EEXIST": // File exists
-        return createError({
-          name: PathExistError.name,
-          repository,
-          path,
-          e,
-        });
-      case "EDQUOT": // Quota exceeded
-        return createError({
-          name: QuotaExceededError.name,
-          repository,
-          path,
-          e,
-        });
-      case "EINVAL": // Invalid argument
-        return createError({
-          name: SyntaxError.name,
-          repository,
-          path,
-          e,
-        });
-    }
-    if (0 <= code.indexOf("NOSUPPORT")) {
-      return createError({
-        name: NotSupportedError.name,
-        repository,
-        path,
-        e,
-      });
-    }
-  }
-  if (write) {
-    return createError({
-      name: NoModificationAllowedError.name,
-      repository,
-      path,
-      e,
-    });
-  } else {
-    return createError({
-      name: NotReadableError.name,
-      repository,
-      path,
-      e,
-    });
-  }
-}
-
 export class NodeFileSystem extends AbstractFileSystem {
   constructor(rootDir: string, options?: FileSystemOptions) {
     super(normalizePath(rootDir), options);
@@ -115,7 +42,7 @@ export class NodeFileSystem extends AbstractFileSystem {
     return new Promise<Stats>((resolve, reject) => {
       fs.stat(this.getFullPath(path), (err, stats) => {
         if (err) {
-          reject(convertError(this.repository, path, err, false));
+          reject(this._error(path, err, false));
         } else {
           if (stats.isDirectory()) {
             resolve({
@@ -147,7 +74,7 @@ export class NodeFileSystem extends AbstractFileSystem {
         props.modified ?? (stats.modified as number),
         (err) => {
           if (err) {
-            reject(convertError(this.repository, path, err, true));
+            reject(this._error(path, err, true));
           } else {
             resolve();
           }
@@ -162,6 +89,74 @@ export class NodeFileSystem extends AbstractFileSystem {
     _options?: URLOptions // eslint-disable-line
   ): Promise<string> {
     return Promise.resolve(pathToFileURL(this.getFullPath(path)).href);
+  }
+
+  public _error(path: string, err: NodeJS.ErrnoException, write: boolean) {
+    const e = err as ErrorLike;
+    const code = err.code;
+    if (code) {
+      switch (code) {
+        case "ENOENT": // No such file or directory
+          return createError({
+            name: NotFoundError.name,
+            repository: this.repository,
+            path,
+            e,
+          });
+        case "ENOTDIR": // Not a directory
+        case "EISDIR": // Is a directory
+          return createError({
+            name: TypeMismatchError.name,
+            repository: this.repository,
+            path,
+            e,
+          });
+        case "EEXIST": // File exists
+          return createError({
+            name: PathExistError.name,
+            repository: this.repository,
+            path,
+            e,
+          });
+        case "EDQUOT": // Quota exceeded
+          return createError({
+            name: QuotaExceededError.name,
+            repository: this.repository,
+            path,
+            e,
+          });
+        case "EINVAL": // Invalid argument
+          return createError({
+            name: SyntaxError.name,
+            repository: this.repository,
+            path,
+            e,
+          });
+      }
+      if (0 <= code.indexOf("NOSUPPORT")) {
+        return createError({
+          name: NotSupportedError.name,
+          repository: this.repository,
+          path,
+          e,
+        });
+      }
+    }
+    if (write) {
+      return createError({
+        name: NoModificationAllowedError.name,
+        repository: this.repository,
+        path,
+        e,
+      });
+    } else {
+      return createError({
+        name: NotReadableError.name,
+        repository: this.repository,
+        path,
+        e,
+      });
+    }
   }
 
   public canPatchAccessed(): boolean {

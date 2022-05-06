@@ -1,18 +1,17 @@
 import * as fs from "fs";
-import { Data, ConvertOptions } from "univ-conv";
+import { ConvertOptions, Data } from "univ-conv";
 import {
   AbstractFile,
-  AbstractFileSystem,
   joinPaths,
   ReadOptions,
   Stats,
   WriteOptions,
 } from "univ-fs";
-import { convertError } from "./NodeFileSystem";
+import { NodeFileSystem } from "./NodeFileSystem";
 
 export class NodeFile extends AbstractFile {
-  constructor(fs: AbstractFileSystem, path: string) {
-    super(fs, path);
+  constructor(private nfs: NodeFileSystem, path: string) {
+    super(nfs, path);
   }
 
   public _getFullPath() {
@@ -48,12 +47,7 @@ export class NodeFile extends AbstractFile {
 
       return readable;
     } catch (e: unknown) {
-      throw convertError(
-        this.fs.repository,
-        this.path,
-        e as NodeJS.ErrnoException,
-        false
-      );
+      throw this.nfs._error(this.path, e as NodeJS.ErrnoException, false);
     }
   }
 
@@ -61,7 +55,7 @@ export class NodeFile extends AbstractFile {
     return new Promise<void>((resolve, reject) => {
       fs.rm(this._getFullPath(), { force: true }, (err) => {
         if (err) {
-          reject(convertError(this.fs.repository, this.path, err, true));
+          reject(this.nfs._error(this.path, err, true));
         } else {
           resolve();
         }
@@ -91,12 +85,7 @@ export class NodeFile extends AbstractFile {
 
       await converter.pipe(data, writable);
     } catch (e) {
-      throw convertError(
-        this.fs.repository,
-        this.path,
-        e as NodeJS.ErrnoException,
-        true
-      );
+      throw this.nfs._error(this.path, e as NodeJS.ErrnoException, true);
     }
   }
 }
