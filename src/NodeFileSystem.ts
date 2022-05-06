@@ -32,58 +32,53 @@ export function convertError(
 ) {
   const e = err as ErrorLike;
   const code = err.code;
-  if (!code) {
-    return createError({
-      repository,
-      path,
-      e,
-    });
-  }
-  switch (code) {
-    case "ENOENT": // No such file or directory
+  if (code) {
+    switch (code) {
+      case "ENOENT": // No such file or directory
+        return createError({
+          name: NotFoundError.name,
+          repository,
+          path,
+          e,
+        });
+      case "ENOTDIR": // Not a directory
+      case "EISDIR": // Is a directory
+        return createError({
+          name: TypeMismatchError.name,
+          repository,
+          path,
+          e,
+        });
+      case "EEXIST": // File exists
+        return createError({
+          name: PathExistError.name,
+          repository,
+          path,
+          e,
+        });
+      case "EDQUOT": // Quota exceeded
+        return createError({
+          name: QuotaExceededError.name,
+          repository,
+          path,
+          e,
+        });
+      case "EINVAL": // Invalid argument
+        return createError({
+          name: SyntaxError.name,
+          repository,
+          path,
+          e,
+        });
+    }
+    if (0 <= code.indexOf("NOSUPPORT")) {
       return createError({
-        name: NotFoundError.name,
+        name: NotSupportedError.name,
         repository,
         path,
         e,
       });
-    case "ENOTDIR": // Not a directory
-    case "EISDIR": // Is a directory
-      return createError({
-        name: TypeMismatchError.name,
-        repository,
-        path,
-        e,
-      });
-    case "EEXIST": // File exists
-      return createError({
-        name: PathExistError.name,
-        repository,
-        path,
-        e,
-      });
-    case "EDQUOT": // Quota exceeded
-      return createError({
-        name: QuotaExceededError.name,
-        repository,
-        path,
-        e,
-      });
-    case "EINVAL": // Invalid argument
-      return createError({
-        name: SyntaxError.name,
-        repository,
-        path,
-        e,
-      });
-  }
-  if (0 <= code.indexOf("NOSUPPORT")) {
-    return createError({
-      name: NotSupportedError.name,
-      repository,
-      path,
-      e,
-    });
+    }
   }
   if (write) {
     return createError({
@@ -108,15 +103,15 @@ export class NodeFileSystem extends AbstractFileSystem {
     fs.mkdirSync(rootDir, { recursive: true });
   }
 
-  public _getDirectory(path: string): Promise<AbstractDirectory> {
+  public _doGetDirectory(path: string): Promise<AbstractDirectory> {
     return Promise.resolve(new NodeDirectory(this, path));
   }
 
-  public _getFile(path: string): Promise<AbstractFile> {
+  public _doGetFile(path: string): Promise<AbstractFile> {
     return Promise.resolve(new NodeFile(this, path));
   }
 
-  public _head(path: string): Promise<Stats> {
+  public _doHead(path: string): Promise<Stats> {
     return new Promise<Stats>((resolve, reject) => {
       fs.stat(this.getFullPath(path), (err, stats) => {
         if (err) {
@@ -139,7 +134,7 @@ export class NodeFileSystem extends AbstractFileSystem {
     });
   }
 
-  public _patch(
+  public _doPatch(
     path: string,
     stats: Stats,
     props: Stats,
@@ -161,7 +156,7 @@ export class NodeFileSystem extends AbstractFileSystem {
     });
   }
 
-  public _toURL(
+  public _doToURL(
     path: string,
     _isDirectory: boolean, // eslint-disable-line
     _options?: URLOptions // eslint-disable-line

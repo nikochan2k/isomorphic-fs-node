@@ -19,18 +19,6 @@ export class NodeFile extends AbstractFile {
     return joinPaths(this.fs.repository, this.path);
   }
 
-  public _rm(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      fs.rm(this._getFullPath(), { force: true }, (err) => {
-        if (err) {
-          reject(convertError(this.fs.repository, this.path, err, true));
-        } else {
-          resolve();
-        }
-      });
-    });
-  }
-
   public supportAppend(): boolean {
     return true;
   }
@@ -43,7 +31,7 @@ export class NodeFile extends AbstractFile {
     return true;
   }
 
-  protected async _load(_stats: Stats, options: ReadOptions): Promise<Data> {
+  protected async _doRead(_stats: Stats, options: ReadOptions): Promise<Data> {
     try {
       let readable = fs.createReadStream(this._getFullPath(), {
         flags: "r",
@@ -69,7 +57,19 @@ export class NodeFile extends AbstractFile {
     }
   }
 
-  protected async _save(
+  protected _doRm(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      fs.rm(this._getFullPath(), { force: true }, (err) => {
+        if (err) {
+          reject(convertError(this.fs.repository, this.path, err, true));
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  protected async _doWrite(
     data: Data,
     _stats: Stats | undefined, // eslint-disable-line
     options: WriteOptions

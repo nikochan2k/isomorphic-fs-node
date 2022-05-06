@@ -12,7 +12,7 @@ export class NodeDirectory extends AbstractDirectory {
     super(fs, path);
   }
 
-  public _list(): Promise<Item[]> {
+  public _doList(): Promise<Item[]> {
     return new Promise<Item[]>((resolve, reject) => {
       fs.readdir(this.getFullPath(), (err, names) => {
         if (err) {
@@ -28,7 +28,7 @@ export class NodeDirectory extends AbstractDirectory {
     });
   }
 
-  public _mkcol(): Promise<void> {
+  public _doMkcol(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       fs.mkdir(this.getFullPath(), { recursive: true }, (err) => {
         if (err) {
@@ -40,7 +40,7 @@ export class NodeDirectory extends AbstractDirectory {
     });
   }
 
-  public _rmdir(): Promise<void> {
+  public _doRmdir(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       fs.rmdir(this.getFullPath(), { recursive: false }, (err) => {
         if (err) {
