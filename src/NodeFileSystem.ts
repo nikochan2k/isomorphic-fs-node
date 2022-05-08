@@ -30,12 +30,20 @@ export class NodeFileSystem extends AbstractFileSystem {
     fs.mkdirSync(rootDir, { recursive: true });
   }
 
-  public _doGetDirectory(path: string): Promise<AbstractDirectory> {
-    return Promise.resolve(new NodeDirectory(this, path));
+  public _doGetDirectory(path: string): AbstractDirectory {
+    return new NodeDirectory(this, path);
   }
 
-  public _doGetFile(path: string): Promise<AbstractFile> {
-    return Promise.resolve(new NodeFile(this, path));
+  public _doGetFile(path: string): AbstractFile {
+    return new NodeFile(this, path);
+  }
+
+  public _doGetURL(
+    path: string,
+    _isDirectory: boolean, // eslint-disable-line
+    _options?: URLOptions // eslint-disable-line
+  ): Promise<string> {
+    return Promise.resolve(pathToFileURL(this.getFullPath(path)).href);
   }
 
   public _doHead(path: string): Promise<Stats> {
@@ -81,14 +89,6 @@ export class NodeFileSystem extends AbstractFileSystem {
         }
       );
     });
-  }
-
-  public _doToURL(
-    path: string,
-    _isDirectory: boolean, // eslint-disable-line
-    _options?: URLOptions // eslint-disable-line
-  ): Promise<string> {
-    return Promise.resolve(pathToFileURL(this.getFullPath(path)).href);
   }
 
   public _error(path: string, err: NodeJS.ErrnoException, write: boolean) {

@@ -7,6 +7,18 @@ export class NodeDirectory extends AbstractDirectory {
     super(nfs, path);
   }
 
+  public _doDelete(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      fs.rmdir(this.getFullPath(), { recursive: false }, (err) => {
+        if (err) {
+          reject(this.nfs._error(this.path, err, true));
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
   public _doList(): Promise<Item[]> {
     return new Promise<Item[]>((resolve, reject) => {
       fs.readdir(this.getFullPath(), (err, names) => {
@@ -26,18 +38,6 @@ export class NodeDirectory extends AbstractDirectory {
   public _doMkcol(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       fs.mkdir(this.getFullPath(), { recursive: true }, (err) => {
-        if (err) {
-          reject(this.nfs._error(this.path, err, true));
-        } else {
-          resolve();
-        }
-      });
-    });
-  }
-
-  public _doRmdir(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      fs.rmdir(this.getFullPath(), { recursive: false }, (err) => {
         if (err) {
           reject(this.nfs._error(this.path, err, true));
         } else {

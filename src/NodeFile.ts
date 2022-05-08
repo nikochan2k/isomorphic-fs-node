@@ -2,6 +2,7 @@ import * as fs from "fs";
 import { ConvertOptions, Data } from "univ-conv";
 import {
   AbstractFile,
+  ExistsAction,
   joinPaths,
   ReadOptions,
   Stats,
@@ -14,20 +15,16 @@ export class NodeFile extends AbstractFile {
     super(nfs, path);
   }
 
-  public _getFullPath() {
-    return joinPaths(this.fs.repository, this.path);
-  }
-
-  public supportAppend(): boolean {
-    return true;
-  }
-
-  public supportRangeRead(): boolean {
-    return true;
-  }
-
-  public supportRangeWrite(): boolean {
-    return true;
+  public _doDelete(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      fs.rm(this._getFullPath(), { force: true }, (err) => {
+        if (err) {
+          reject(this.nfs._error(this.path, err, true));
+        } else {
+          resolve();
+        }
+      });
+    });
   }
 
   public async _doRead(_stats: Stats, options: ReadOptions): Promise<Data> {
@@ -51,25 +48,15 @@ export class NodeFile extends AbstractFile {
     }
   }
 
-  public _doRm(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      fs.rm(this._getFullPath(), { force: true }, (err) => {
-        if (err) {
-          reject(this.nfs._error(this.path, err, true));
-        } else {
-          resolve();
-        }
-      });
-    });
-  }
-
   public async _doWrite(
     data: Data,
     _stats: Stats | undefined, // eslint-disable-line
     options: WriteOptions
   ): Promise<void> {
     try {
-      const flags = (options.append ? "a" : "w") + (options.create ? "x" : "");
+      const flags =
+        (options.append ? "a" : "w") +
+        (options.onExists === ExistsAction.Error ? "x" : "");
       const writable = fs.createWriteStream(this._getFullPath(), {
         flags,
         highWaterMark: options.bufferSize,
@@ -87,5 +74,21 @@ export class NodeFile extends AbstractFile {
     } catch (e) {
       throw this.nfs._error(this.path, e as NodeJS.ErrnoException, true);
     }
+  }
+
+  public _getFullPath() {
+    return joinPaths(this.fs.repository, this.path);
+  }
+
+  public supportAppend(): boolean {
+    return true;
+  }
+
+  public supportRangeRead(): boolean {
+    return true;
+  }
+
+  public supportRangeWrite(): boolean {
+    return true;
   }
 }
