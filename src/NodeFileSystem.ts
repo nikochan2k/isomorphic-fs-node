@@ -6,6 +6,7 @@ import {
   createError,
   ErrorLike,
   FileSystemOptions,
+  InvalidModificationError,
   joinPaths,
   NoModificationAllowedError,
   normalizePath,
@@ -15,7 +16,6 @@ import {
   PathExistError,
   QuotaExceededError,
   Stats,
-  SyntaxError,
   TypeMismatchError,
 } from "univ-fs";
 import { pathToFileURL } from "url";
@@ -37,7 +37,9 @@ export class NodeFileSystem extends AbstractFileSystem {
   }
 
   public _doGetURL(path: string): Promise<string> {
-    return Promise.resolve(pathToFileURL(this.getFullPath(path)).href);
+    const fullPath = this.getFullPath(path);
+    const url = pathToFileURL(fullPath).href;
+    return Promise.resolve(url);
   }
 
   public _doHead(path: string): Promise<Stats> {
@@ -115,12 +117,14 @@ export class NodeFileSystem extends AbstractFileSystem {
             e,
           });
         case "EINVAL": // Invalid argument
-          return createError({
-            name: SyntaxError.name,
-            repository: this.repository,
-            path,
-            e,
-          });
+          if (write) {
+            return createError({
+              name: InvalidModificationError.name,
+              repository: this.repository,
+              path,
+              e,
+            });
+          }
       }
       if (0 <= code.indexOf("NOSUPPORT")) {
         return createError({

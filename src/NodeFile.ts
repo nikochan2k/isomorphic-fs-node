@@ -2,7 +2,6 @@ import * as fs from "fs";
 import { ConvertOptions, Data } from "univ-conv";
 import {
   AbstractFile,
-  ExistsAction,
   joinPaths,
   ReadOptions,
   Stats,
@@ -54,18 +53,15 @@ export class NodeFile extends AbstractFile {
     options: WriteOptions
   ): Promise<void> {
     try {
-      const flags =
-        (options.append ? "a" : "w") +
-        (options.onExists === ExistsAction.Error ? "x" : "");
       const writable = fs.createWriteStream(this._getFullPath(), {
-        flags,
+        flags: options.append ? "a" : "w",
         highWaterMark: options.bufferSize,
         start: options.start,
       });
 
       const converter = this._getConverter();
-      if (0 < (options.length as number)) {
-        const co: Partial<ConvertOptions> = { ...options };
+      if (options.length != null && 0 < options.length) {
+        const co = { ...options };
         delete co.start;
         data = await converter.slice(data, co);
       }
