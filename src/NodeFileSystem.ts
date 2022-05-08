@@ -12,13 +12,11 @@ import {
   NotFoundError,
   NotReadableError,
   NotSupportedError,
-  PatchOptions,
   PathExistError,
   QuotaExceededError,
   Stats,
   SyntaxError,
   TypeMismatchError,
-  URLOptions,
 } from "univ-fs";
 import { pathToFileURL } from "url";
 import { NodeDirectory } from "./NodeDirectory";
@@ -38,11 +36,7 @@ export class NodeFileSystem extends AbstractFileSystem {
     return new NodeFile(this, path);
   }
 
-  public _doGetURL(
-    path: string,
-    _isDirectory: boolean, // eslint-disable-line
-    _options?: URLOptions // eslint-disable-line
-  ): Promise<string> {
+  public _doGetURL(path: string): Promise<string> {
     return Promise.resolve(pathToFileURL(this.getFullPath(path)).href);
   }
 
@@ -69,12 +63,7 @@ export class NodeFileSystem extends AbstractFileSystem {
     });
   }
 
-  public _doPatch(
-    path: string,
-    stats: Stats,
-    props: Stats,
-    _options: PatchOptions // eslint-disable-line
-  ): Promise<void> {
+  public _doPatch(path: string, stats: Stats, props: Stats): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       fs.utimes(
         this.getFullPath(path),

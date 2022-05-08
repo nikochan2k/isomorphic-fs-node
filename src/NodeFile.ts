@@ -50,7 +50,7 @@ export class NodeFile extends AbstractFile {
 
   public async _doWrite(
     data: Data,
-    _stats: Stats | undefined, // eslint-disable-line
+    _stats: Stats | null | undefined,
     options: WriteOptions
   ): Promise<void> {
     try {
